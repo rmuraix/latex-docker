@@ -1,4 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>rmuraix/renovate-config"]
+  "extends": ["github>rmuraix/renovate-config"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^Dockerfile$/"],
+      "matchStrings": ["ARG NODE_VERSION=(?<currentValue>.*?)\\n"],
+      "depNameTemplate": "node",
+      "datasourceTemplate": "github-tags",
+      "versioningTemplate": "node",
+      "packageNameTemplate": "nodejs/node"
+    }
+  ]
 }
