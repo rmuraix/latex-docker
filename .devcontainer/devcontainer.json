@@ -1,0 +1,63 @@
+{
+  "name": "latex",
+  "build": {
+    "dockerfile": "../Dockerfile"
+  },
+  "remoteUser": "ubuntu",
+
+  "features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"installZsh": false,
+			"installOhMyZsh": false,
+			"installOhMyZshConfig": false,
+			"upgradePackages": false,
+			"username": "ubuntu",
+			"userUid": "automatic",
+			"userGid": "automatic"
+		}
+	},
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "James-Yu.latex-workshop"
+      ],
+      "settings": {
+        "latex-workshop.latex.tools": [
+          {
+            "name": "latexmk (pdfLaTeX)",
+            "command": "latexmk",
+            "args": [
+              "-pdf",
+              "-interaction=nonstopmode",
+              "-file-line-error",
+              "%DOC%"
+            ]
+          },
+          {
+            "name": "latexmk (LuaLaTeX)",
+            "command": "latexmk",
+            "args": [
+              "-lualatex",
+              "-interaction=nonstopmode",
+              "-file-line-error",
+              "%DOC%"
+            ]
+          }
+        ],
+        "latex-workshop.latex.recipes": [
+          {
+            "name": "pdfLaTeX",
+            "tools": ["latexmk (pdfLaTeX)"]
+          },
+          {
+            "name": "LuaLaTeX",
+            "tools": ["latexmk (LuaLaTeX)"]
+          }
+        ],
+
+        "latex-workshop.latex.autoBuild.run": "never"
+      }
+    }
+  }
+}
