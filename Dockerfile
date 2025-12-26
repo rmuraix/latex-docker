@@ -13,6 +13,10 @@ ENV TL_TEXDIR=/usr/local/texlive/current
 ENV TL_BIN=${TL_TEXDIR}/bin/x86_64-linux
 ENV PATH="${TL_BIN}:/usr/local/node/bin:$PATH"
 
+# User
+ARG USER_UID=1000
+ARG USER_GID=1000
+
 # --------------------------------------------------
 # OS dependencies
 # --------------------------------------------------
@@ -77,6 +81,18 @@ RUN --mount=type=cache,target=/var/cache/tlmgr,sharing=locked \
       collection-langjapanese \
       latexmk \
       biber
+
+# --------------------------------------------------
+# Align ubuntu UID/GID with host if requested
+# --------------------------------------------------
+RUN set -eux; \
+    if [ "$(id -u ubuntu)" != "${USER_UID}" ]; then \
+      usermod -u "${USER_UID}" ubuntu; \
+    fi; \
+    if [ "$(id -g ubuntu)" != "${USER_GID}" ]; then \
+      groupmod -g "${USER_GID}" ubuntu; \
+    fi; \
+    chown -R "${USER_UID}:${USER_GID}" /home/ubuntu
 
 # --------------------------------------------------
 # Workspace
