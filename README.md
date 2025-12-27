@@ -1,6 +1,9 @@
 # Docker Image for LaTeX
 
+![Licence](https://img.shields.io/github/license/rmuraix/latex-docker)
+
 ## About
+
 Ubuntu-based image with TeX Live and Node.js preinstalled for building LaTeX documents, including Japanese support.
 
 ## Usage
