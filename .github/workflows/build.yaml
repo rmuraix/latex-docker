@@ -6,6 +6,9 @@ on:
     tags: [ "v*" ]
   pull_request:
     branches: [ "main" ]
+    paths: 
+      - "**/Dockerfile"
+      - ".github/workflows/build.yaml"
   workflow_dispatch:
 
 permissions:
