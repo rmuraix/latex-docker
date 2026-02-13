@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LC_ALL=C.UTF-8
 
 ARG TL_REPO=http://mirror.ctan.org/systems/texlive/tlnet/
-ARG NODE_VERSION=24.12.0
+ARG NODE_VERSION=24.13.1
 
 # TeX Live
 ENV TL_TEXDIR=/usr/local/texlive/current
