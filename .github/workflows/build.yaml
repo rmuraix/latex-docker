@@ -41,10 +41,10 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Test PDFLaTeX build
-        run: docker run --rm -v "$PWD/test":/work latex-docker:test latexmk -pdf -interaction=nonstopmode main.tex
+        run: docker run --rm --user "$(id -u):$(id -g)" -v "$PWD/test":/work latex-docker:test latexmk -pdf -interaction=nonstopmode main.tex
 
       - name: Test LuaLaTeX build
-        run: docker run --rm -v "$PWD/test":/work latex-docker:test latexmk -lualatex -interaction=nonstopmode lualatex.tex
+        run: docker run --rm --user "$(id -u):$(id -g)" -v "$PWD/test":/work latex-docker:test latexmk -lualatex -interaction=nonstopmode lualatex.tex
 
   build-and-push:
     needs: test
