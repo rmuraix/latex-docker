@@ -1,11 +1,17 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>rmuraix/renovate-config"],
+  "extends": [
+    "github>rmuraix/renovate-config"
+  ],
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["/^Dockerfile$/"],
-      "matchStrings": ["ARG NODE_VERSION=(?<currentValue>.*?)\\n"],
+      "managerFilePatterns": [
+        "/^Dockerfile$/"
+      ],
+      "matchStrings": [
+        "ARG NODE_VERSION=(?<currentValue>.*?)\\n"
+      ],
       "depNameTemplate": "node",
       "datasourceTemplate": "github-tags",
       "versioningTemplate": "node",
@@ -14,11 +20,21 @@
   ],
   "packageRules": [
     {
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["texlive/texlive"],
-      "schedule": ["on the first day of the month"],
-      "updateTypes": ["digest"],
-      "addLabels": ["monthly"],
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "texlive/texlive"
+      ],
+      "schedule": [
+        "on the first day of the month"
+      ],
+      "matchUpdateTypes": [
+        "digest"
+      ],
+      "addLabels": [
+        "monthly"
+      ],
       "automerge": true
     }
   ]
