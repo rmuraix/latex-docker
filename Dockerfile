@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM ubuntu:24.04
+FROM texlive/texlive:latest-basic@sha256:d016e51c39c7e8042081adf9edf7f9c6fd7229d6010ff0f32396f9b9ba83ec1b
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
@@ -8,10 +8,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
 ARG TL_REPO=http://mirror.ctan.org/systems/texlive/tlnet/
 ARG NODE_VERSION=24.13.1
 
-# TeX Live
-ENV TL_TEXDIR=/usr/local/texlive/current
-ENV TL_BIN=${TL_TEXDIR}/bin/x86_64-linux
-ENV PATH="${TL_BIN}:/usr/local/node/bin:$PATH"
+# Node.js
+ENV PATH="/usr/local/node/bin:$PATH"
 
 # User
 ARG USER_UID=1000
@@ -24,13 +22,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
     apt-get update \
  && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    curl \
-    fontconfig \
-    make \
-    perl \
-    python3 \
-    tar \
     xz-utils \
  && rm -rf /var/lib/apt/lists/*
 
@@ -43,27 +34,6 @@ RUN --mount=type=cache,target=/var/cache/node,sharing=locked \
       -o /var/cache/node/node.tar.xz; \
     tar -xJf /var/cache/node/node.tar.xz -C /usr/local; \
     ln -s /usr/local/node-v${NODE_VERSION}-linux-x64 /usr/local/node
-
-# --------------------------------------------------
-# TeX Live base install
-# --------------------------------------------------
-RUN --mount=type=cache,target=/var/cache/texlive-installer,sharing=locked \
-    set -eux; \
-    mkdir -p /tmp/install-tl-unx; \
-    curl -L "${TL_REPO}/install-tl-unx.tar.gz" \
-      -o /var/cache/texlive-installer/install-tl-unx.tar.gz; \
-    tar -xzf /var/cache/texlive-installer/install-tl-unx.tar.gz \
-      -C /tmp/install-tl-unx --strip-components=1; \
-    printf '%s\n' \
-      'selected_scheme scheme-basic' \
-      'tlpdbopt_install_docfiles 0' \
-      'tlpdbopt_install_srcfiles 0' \
-      > /tmp/install-tl-unx/texlive.profile; \
-    /tmp/install-tl-unx/install-tl \
-      --repository "${TL_REPO}" \
-      --texdir "${TL_TEXDIR}" \
-      -profile /tmp/install-tl-unx/texlive.profile; \
-    rm -rf /tmp/install-tl-unx
 
 # --------------------------------------------------
 # tlmgr packages
@@ -83,19 +53,16 @@ RUN --mount=type=cache,target=/var/cache/tlmgr,sharing=locked \
       biber
 
 # --------------------------------------------------
-# Align ubuntu UID/GID with host if requested
-# --------------------------------------------------
-RUN set -eux; \
-    if [ "$(id -u ubuntu)" != "${USER_UID}" ]; then \
-      usermod -u "${USER_UID}" ubuntu; \
-    fi; \
-    if [ "$(id -g ubuntu)" != "${USER_GID}" ]; then \
-      groupmod -g "${USER_GID}" ubuntu; \
-    fi; \
-    chown -R "${USER_UID}:${USER_GID}" /home/ubuntu
-
-# --------------------------------------------------
 # Workspace
 # --------------------------------------------------
+RUN set -eux; \
+    if [ "$(id -u texlive)" != "${USER_UID}" ]; then \
+      usermod -u "${USER_UID}" texlive; \
+    fi; \
+    if [ "$(id -g texlive)" != "${USER_GID}" ]; then \
+      groupmod -g "${USER_GID}" texlive; \
+    fi; \
+    chown -R "${USER_UID}:${USER_GID}" /home/texlive
+
 WORKDIR /work
-USER ubuntu
+USER texlive
