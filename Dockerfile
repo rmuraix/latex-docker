@@ -1,4 +1,8 @@
 # syntax=docker/dockerfile:1
+ARG NODE_VERSION=24.13.1
+
+FROM node:${NODE_VERSION} AS node
+
 FROM texlive/texlive:latest-basic@sha256:d016e51c39c7e8042081adf9edf7f9c6fd7229d6010ff0f32396f9b9ba83ec1b
 
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -6,34 +10,18 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LC_ALL=C.UTF-8
 
 ARG TL_REPO=http://mirror.ctan.org/systems/texlive/tlnet/
-ARG NODE_VERSION=24.13.1
-
-# Node.js
-ENV PATH="/usr/local/node/bin:$PATH"
 
 # User
 ARG USER_UID=1000
 ARG USER_GID=1000
 
 # --------------------------------------------------
-# OS dependencies
-# --------------------------------------------------
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
-    apt-get update \
- && apt-get install -y --no-install-recommends \
-    xz-utils \
- && rm -rf /var/lib/apt/lists/*
-
-# --------------------------------------------------
 # Node.js
 # --------------------------------------------------
-RUN --mount=type=cache,target=/var/cache/node,sharing=locked \
-    set -eux; \
-    curl -L "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" \
-      -o /var/cache/node/node.tar.xz; \
-    tar -xJf /var/cache/node/node.tar.xz -C /usr/local; \
-    ln -s /usr/local/node-v${NODE_VERSION}-linux-x64 /usr/local/node
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /usr/local/bin/npm /usr/local/bin/npm
+COPY --from=node /usr/local/bin/npx /usr/local/bin/npx
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 # --------------------------------------------------
 # tlmgr packages
