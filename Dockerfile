@@ -11,10 +11,6 @@ ARG NODE_VERSION=24.13.1
 # Node.js
 ENV PATH="/usr/local/node/bin:$PATH"
 
-# User
-ARG USER_UID=1000
-ARG USER_GID=1000
-
 # --------------------------------------------------
 # OS dependencies
 # --------------------------------------------------
@@ -53,14 +49,7 @@ RUN --mount=type=cache,target=/var/cache/tlmgr,sharing=locked \
       biber
 
 # --------------------------------------------------
-# Create ubuntu user
-# --------------------------------------------------
-RUN set -eux; \
-    groupadd -g "${USER_GID}" ubuntu; \
-    useradd -u "${USER_UID}" -g "${USER_GID}" -m -s /bin/bash ubuntu
-
-# --------------------------------------------------
 # Workspace
 # --------------------------------------------------
 WORKDIR /work
-USER ubuntu
+USER texlive
