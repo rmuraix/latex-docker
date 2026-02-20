@@ -44,7 +44,7 @@ jobs:
         run: docker run --rm -v "$PWD/test":/work latex-docker:test latexmk -pdf -interaction=nonstopmode main.tex
 
       - name: Test LuaLaTeX build
-        run: docker run --rm -v "$PWD/test":/work latex-docker:test latexmk -lualatex -interaction=nonstopmode main.tex
+        run: docker run --rm -v "$PWD/test":/work latex-docker:test latexmk -lualatex -interaction=nonstopmode lualatex.tex
 
   build-and-push:
     needs: test

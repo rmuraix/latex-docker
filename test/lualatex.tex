@@ -1,8 +1,6 @@
 \documentclass{article}
-\usepackage{lmodern}       % collection-fontsrecommended
+\usepackage{luatexja}      % collection-luatex / collection-langjapanese
 \usepackage{amsmath}       % collection-latexrecommended
-\usepackage{graphicx}      % collection-latexrecommended
-\usepackage{hyperref}      % collection-latexrecommended
 \usepackage{booktabs}      % collection-latexextra
 \begin{document}
 \section{Introduction}
@@ -12,11 +10,14 @@ Hello, World!
   E = mc^2
 \end{equation}
 
+\section{日本語テスト}
+日本語のサポートを確認します。
+
 \begin{tabular}{ll}
   \toprule
-  Engine & Status \\
+  エンジン & 状態 \\
   \midrule
-  PDFLaTeX & OK \\
+  LuaLaTeX & OK \\
   \bottomrule
 \end{tabular}
 \end{document}
