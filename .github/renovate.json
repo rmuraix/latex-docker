@@ -17,7 +17,9 @@
       "matchDatasources": ["docker"],
       "matchPackageNames": ["texlive/texlive"],
       "schedule": ["on the first day of the month"],
-      "updateTypes": ["digest"]
+      "updateTypes": ["digest"],
+      "addLabels": ["monthly"],
+      "automerge": true
     }
   ]
 }

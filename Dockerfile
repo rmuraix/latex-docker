@@ -11,6 +11,10 @@ ARG NODE_VERSION=24.13.1
 # Node.js
 ENV PATH="/usr/local/node/bin:$PATH"
 
+# User
+ARG USER_UID=1000
+ARG USER_GID=1000
+
 # --------------------------------------------------
 # OS dependencies
 # --------------------------------------------------
@@ -51,5 +55,14 @@ RUN --mount=type=cache,target=/var/cache/tlmgr,sharing=locked \
 # --------------------------------------------------
 # Workspace
 # --------------------------------------------------
+RUN set -eux; \
+    if [ "$(id -u texlive)" != "${USER_UID}" ]; then \
+      usermod -u "${USER_UID}" texlive; \
+    fi; \
+    if [ "$(id -g texlive)" != "${USER_GID}" ]; then \
+      groupmod -g "${USER_GID}" texlive; \
+    fi; \
+    chown -R "${USER_UID}:${USER_GID}" /home/texlive
+
 WORKDIR /work
 USER texlive
