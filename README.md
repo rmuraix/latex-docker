@@ -9,6 +9,12 @@ Ubuntu-based image with TeX Live and Node.js preinstalled for building LaTeX doc
 
 ## Usage
 
+### Image Tags
+
+- `latest`: latest build from the default branch.
+- `vX.Y.Z`: SemVer tags assigned according to changes.
+- `YYYY-MM-DD`: monthly snapshot tag. May include changes beyond dependency digest updates.
+
 ### Build LaTeX Documents
 
 ```bash
