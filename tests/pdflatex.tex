@@ -1,0 +1,39 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+
+\geometry{margin=1in}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+
+\title{pdfLaTeX Test Document}
+\author{Test}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+This document verifies that basic pdfLaTeX compilation works correctly
+using the packages installed in the image.
+
+\section{Mathematics}
+The quadratic formula:
+\begin{equation}
+  x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+\end{equation}
+
+\section{Table}
+\begin{tabular}{lrr}
+  \toprule
+  Item  & Quantity & Price \\
+  \midrule
+  Alpha & 3        & \textcolor{blue}{\$1.00} \\
+  Beta  & 7        & \textcolor{red}{\$2.50} \\
+  \bottomrule
+\end{tabular}
+
+\end{document}
