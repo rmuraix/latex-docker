@@ -21,7 +21,6 @@ COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 RUN --mount=type=cache,target=/var/cache/tlmgr,sharing=locked \
     set -eux; \
     tlmgr option repository "${TL_REPO}"; \
-    tlmgr update --self; \
     tlmgr install \
       collection-latexrecommended \
       collection-latexextra \
