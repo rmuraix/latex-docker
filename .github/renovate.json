@@ -3,21 +3,6 @@
   "extends": [
     "github>rmuraix/renovate-config"
   ],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/^Dockerfile$/"
-      ],
-      "matchStrings": [
-        "ARG NODE_VERSION=(?<currentValue>.*?)\\n"
-      ],
-      "depNameTemplate": "node",
-      "datasourceTemplate": "github-tags",
-      "versioningTemplate": "node",
-      "packageNameTemplate": "nodejs/node"
-    }
-  ],
   "packageRules": [
     {
       "matchDatasources": [
@@ -26,16 +11,37 @@
       "matchPackageNames": [
         "texlive/texlive"
       ],
-      "schedule": [
-        "on the first day of the month"
-      ],
       "matchUpdateTypes": [
         "digest"
+      ],
+      "schedule": [
+        "on the first day of the month"
       ],
       "addLabels": [
         "monthly"
       ],
-      "automerge": true
+      "automerge": true,
+      "groupName": "monthly updates"
+    },
+    {
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "node"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "schedule": [
+        "on the first day of the month"
+      ],
+      "addLabels": [
+        "monthly"
+      ],
+      "automerge": true,
+      "groupName": "monthly updates"
     }
   ]
 }
