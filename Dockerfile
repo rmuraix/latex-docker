@@ -21,6 +21,9 @@ COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 RUN --mount=type=cache,target=/var/cache/tlmgr,sharing=locked \
     set -eux; \
     tlmgr option repository "${TL_REPO}"; \
+    tlmgr option docfiles 0; \
+    tlmgr option srcfiles 0; \
+    tlmgr option autobackup 0; \
     tlmgr install \
       collection-latexrecommended \
       collection-latexextra \
@@ -29,12 +32,7 @@ RUN --mount=type=cache,target=/var/cache/tlmgr,sharing=locked \
       collection-luatex \
       collection-langjapanese \
       latexmk \
-      biber
-
-# --------------------------------------------------
-# PATH
-# --------------------------------------------------
-RUN set -eux; \
+      biber; \
     tlmgr path add
 
 # --------------------------------------------------
