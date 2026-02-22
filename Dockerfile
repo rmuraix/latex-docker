@@ -1,7 +1,5 @@
 # syntax=docker/dockerfile:1
-ARG NODE_VERSION=24.13.1
-
-FROM node:${NODE_VERSION} AS node
+FROM node:24.13.1 AS node
 
 FROM texlive/texlive:latest-basic@sha256:d016e51c39c7e8042081adf9edf7f9c6fd7229d6010ff0f32396f9b9ba83ec1b
 
