@@ -1,0 +1,34 @@
+\documentclass{article}
+\usepackage{luatexja}
+\usepackage{fontspec}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{hyperref}
+
+\geometry{margin=1in}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+
+\title{LuaLaTeX Test Document / LuaLaTeX テストドキュメント}
+\author{Test}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Introduction / はじめに}
+This document verifies that LuaLaTeX compilation with Japanese text works
+correctly using the packages installed in the image.
+このドキュメントは、画像にインストールされたパッケージを使用して、
+日本語テキストを含む LuaLaTeX のコンパイルが正しく動作することを確認します。
+
+\section{Mathematics / 数式}
+Euler's identity:
+\begin{equation}
+  e^{i\pi} + 1 = 0
+\end{equation}
+
+\section{Japanese Text / 日本語テキスト}
+日本語と English を混在させたテキストのテストです。
+漢字、ひらがな、カタカナがすべて正しく表示されることを確認します。
+
+\end{document}
