@@ -32,6 +32,17 @@ RUN --mount=type=cache,target=/var/cache/tlmgr,sharing=locked \
       biber
 
 # --------------------------------------------------
+# PATH
+# --------------------------------------------------
+RUN set -eux; \
+    tlbin=$(find /usr/local/texlive -maxdepth 5 -name 'pdflatex' -type f 2>/dev/null \
+            | head -1 | xargs -r dirname); \
+    test -n "${tlbin}" || { echo 'ERROR: TeX Live bin directory not found'; exit 1; }; \
+    ln -sf "${tlbin}" /usr/local/texlive/bin-arch
+
+ENV PATH="/usr/local/texlive/bin-arch:${PATH}"
+
+# --------------------------------------------------
 # Workspace
 # --------------------------------------------------
 RUN set -eux; \
