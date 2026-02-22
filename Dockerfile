@@ -18,10 +18,11 @@ ARG USER_GID=1000
 # --------------------------------------------------
 # Node.js
 # --------------------------------------------------
-COPY --from=node /usr/local/bin/node /usr/local/bin/node
-COPY --from=node /usr/local/bin/npm /usr/local/bin/npm
-COPY --from=node /usr/local/bin/npx /usr/local/bin/npx
-COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node \
+  /usr/local/bin/node /usr/local/bin/node \
+  /usr/local/bin/npm /usr/local/bin/npm \
+  /usr/local/bin/npx /usr/local/bin/npx \
+  /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 # --------------------------------------------------
 # tlmgr packages
