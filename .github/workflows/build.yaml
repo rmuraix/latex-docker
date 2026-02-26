@@ -77,3 +77,9 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_NAME }}:latest \
             latexmk -lualatex -interaction=nonstopmode -halt-on-error \
               -output-directory=/tmp lualatex.tex
+
+      - name: Test npm (non-root user)
+        run: |
+          docker run --rm \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_NAME }}:latest \
+            npm --version

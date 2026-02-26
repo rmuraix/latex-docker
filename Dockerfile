@@ -51,7 +51,9 @@ RUN set -eux; \
     chown dev: /work
 
 ENV HOME=/home/dev \
-    XDG_CACHE_HOME=/home/dev/.cache
+    XDG_CACHE_HOME=/home/dev/.cache \
+    NPM_CONFIG_PREFIX=/home/dev/.npm-global \
+    PATH="/home/dev/.npm-global/bin:${PATH}"
 
 WORKDIR /work
 USER dev
