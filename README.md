@@ -5,7 +5,7 @@
 
 ## About
 
-Ubuntu-based image with TeX Live and Node.js preinstalled for building LaTeX documents, including Japanese support.
+Debian-based image with TeX Live and Node.js preinstalled for building LaTeX documents, including Japanese support.
 
 ## Usage
 
