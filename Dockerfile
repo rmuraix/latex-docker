@@ -41,14 +41,7 @@ RUN --mount=type=cache,target=/var/cache/tlmgr,sharing=locked \
 # Workspace
 # --------------------------------------------------
 RUN set -eux; \
-    if ! getent group 1000 >/dev/null 2>&1; then \
-      groupadd --gid 1000 dev; \
-    fi; \
-    if ! getent passwd 1000 >/dev/null 2>&1; then \
-      useradd --uid 1000 --gid 1000 --create-home --shell /bin/bash dev; \
-    else \
-      useradd --gid 1000 --create-home --shell /bin/bash dev; \
-    fi; \
+    useradd --create-home --shell /bin/bash dev; \
     mkdir -p /work; \
     chown dev: /work
 
