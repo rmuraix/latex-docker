@@ -40,7 +40,7 @@ jobs:
         id: meta
         env:
           TZ: Asia/Tokyo
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_NAME }}
           tags: |
