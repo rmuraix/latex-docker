@@ -8,6 +8,10 @@
 #   - tlmgr repository reference
 # point to the same historic tlnet-final URL for reproducibility.
 #
+# NOTE: Docker does not expand ARG values inside other ARG default values.
+# The repository URL is therefore constructed as a shell variable inside each
+# RUN command, where ${TL_YEAR} is properly available as an environment variable.
+#
 # To update the OS base image digest, run:
 #   docker pull --platform linux/amd64 debian:12-slim
 # and replace the sha256 below with the new digest.
@@ -21,7 +25,6 @@ ARG DEBIAN_VERSION=12
 FROM debian:${DEBIAN_VERSION}-slim@sha256:8af0e5095f9964007f5ebd11191dfe52dcb51bf3afa2c07f055fc5451b78ba0e
 
 ARG TL_YEAR=2025
-ARG TL_REPO=https://ftp.tug.org/historic/systems/texlive/${TL_YEAR}/tlnet-final
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
@@ -53,9 +56,12 @@ RUN sed \
 
 # --------------------------------------------------
 # install-tl — downloaded from the same historic repository
+# The URL is constructed here in the shell so that ${TL_YEAR} is
+# correctly expanded (Docker does not expand ARGs inside other ARG defaults).
 # --------------------------------------------------
 RUN --mount=type=cache,target=/var/cache/install-tl,sharing=locked \
     set -eux; \
+    TL_REPO="https://ftp.tug.org/historic/systems/texlive/${TL_YEAR}/tlnet-final"; \
     INSTALLER=$(mktemp -d); \
     wget -qO- "${TL_REPO}/install-tl-unx.tar.gz" | tar -xz -C "${INSTALLER}"; \
     "${INSTALLER}"/install-tl-*/install-tl \
@@ -66,6 +72,7 @@ RUN --mount=type=cache,target=/var/cache/install-tl,sharing=locked \
 
 # --------------------------------------------------
 # PATH: explicit year + arch directory (no wildcard symlinks)
+# ENV CAN reference ARG values declared in the same stage.
 # --------------------------------------------------
 ENV PATH="/usr/local/texlive/${TL_YEAR}/bin/x86_64-linux:${PATH}"
 
@@ -73,11 +80,13 @@ ENV PATH="/usr/local/texlive/${TL_YEAR}/bin/x86_64-linux:${PATH}"
 # Additional collections and tools (via tlmgr)
 # tlmgr repository is pinned to the same historic snapshot
 # --------------------------------------------------
-RUN tlmgr option repository "${TL_REPO}" \
- && tlmgr option -- autobackup 0 \
- && tlmgr option -- docfiles 0 \
- && tlmgr option -- srcfiles 0 \
- && tlmgr install \
+RUN set -eux; \
+    TL_REPO="https://ftp.tug.org/historic/systems/texlive/${TL_YEAR}/tlnet-final"; \
+    tlmgr option repository "${TL_REPO}"; \
+    tlmgr option -- autobackup 0; \
+    tlmgr option -- docfiles 0; \
+    tlmgr option -- srcfiles 0; \
+    tlmgr install \
       collection-latexrecommended \
       collection-latexextra \
       collection-fontsrecommended \
@@ -85,6 +94,6 @@ RUN tlmgr option repository "${TL_REPO}" \
       collection-luatex \
       collection-langjapanese \
       latexmk \
-      biber \
- && rm -rf /usr/local/texlive/${TL_YEAR}/tlpkg/backups \
- && mktexlsr
+      biber; \
+    rm -rf /usr/local/texlive/${TL_YEAR}/tlpkg/backups; \
+    mktexlsr
