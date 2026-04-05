@@ -16,7 +16,7 @@ GHA cache preserves the TeX Live installation layer between runs.
 |---|---|
 | Base OS | `debian:12-slim` (digest pinned, Renovate-managed) |
 | TeX Live year | 2025 (fixed via `TL_YEAR` build arg) |
-| TeX Live source | `https://ftp.tug.org/historic/systems/texlive/2025/tlnet-final` |
+| TeX Live source | `https://tug.org/historic/systems/texlive/2025/tlnet-final` |
 | install-tl source | Same historic URL |
 | tlmgr repository | Same historic URL |
 | PATH | `/usr/local/texlive/2025/bin/x86_64-linux` (explicit, no symlinks) |
@@ -59,7 +59,7 @@ with a `YYYY-MM-DD` date tag.
 
 The `test-next-year.yaml` workflow runs on the 1st of each month and:
 
-1. Checks whether `https://ftp.tug.org/historic/systems/texlive/{NEXT_YEAR}/tlnet-final/` is available.
+1. Checks whether `https://tug.org/historic/systems/texlive/{NEXT_YEAR}/tlnet-final/` is available.
 2. If yes, builds the `latex-base` stage with `TL_YEAR={NEXT_YEAR}`.
 3. Runs the full test suite (pdflatex, lualatex+Japanese, biber).
 4. If all tests pass, opens a PR updating `TL_YEAR` in `Dockerfile` and year paths in `texlive.profile`.

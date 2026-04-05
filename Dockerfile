@@ -56,8 +56,8 @@ RUN sed \
 # inside other ARG default values.
 # --------------------------------------------------
 RUN --mount=type=cache,target=/var/cache/install-tl,sharing=locked \
-    set -eux; \
-    TL_REPO="https://ftp.tug.org/historic/systems/texlive/${TL_YEAR}/tlnet-final"; \
+    set -euxo pipefail; \
+    TL_REPO="https://tug.org/historic/systems/texlive/${TL_YEAR}/tlnet-final"; \
     INSTALLER=$(mktemp -d); \
     wget -qO- "${TL_REPO}/install-tl-unx.tar.gz" | tar -xz -C "${INSTALLER}"; \
     "${INSTALLER}"/install-tl-*/install-tl \
@@ -77,7 +77,7 @@ ENV PATH="/usr/local/texlive/${TL_YEAR}/bin/x86_64-linux:${PATH}"
 # Repository pinned to the same historic snapshot
 # --------------------------------------------------
 RUN set -eux; \
-    TL_REPO="https://ftp.tug.org/historic/systems/texlive/${TL_YEAR}/tlnet-final"; \
+    TL_REPO="https://tug.org/historic/systems/texlive/${TL_YEAR}/tlnet-final"; \
     tlmgr option repository "${TL_REPO}"; \
     tlmgr option -- autobackup 0; \
     tlmgr option -- docfiles 0; \

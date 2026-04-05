@@ -32,7 +32,7 @@ jobs:
         id: check
         run: |
           NEXT="${{ steps.years.outputs.next }}"
-          URL="https://ftp.tug.org/historic/systems/texlive/${NEXT}/tlnet-final/"
+          URL="https://tug.org/historic/systems/texlive/${NEXT}/tlnet-final/"
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" --head --max-time 30 "${URL}")
           echo "status=${STATUS}" >> $GITHUB_OUTPUT
           if [ "${STATUS}" != "200" ]; then
@@ -120,7 +120,7 @@ jobs:
 
             ### Before merging
             - Review the [TeX Live ${{ steps.years.outputs.next }} release notes](https://tug.org/texlive/doc/texlive-en/texlive-en.html)
-            - Verify the historic URL is stable: `https://ftp.tug.org/historic/systems/texlive/${{ steps.years.outputs.next }}/tlnet-final/`
+            - Verify the historic URL is stable: `https://tug.org/historic/systems/texlive/${{ steps.years.outputs.next }}/tlnet-final/`
             - After merging, `build.yaml` will publish `latex-base:${{ steps.years.outputs.next }}` and `latex:latest`
 
             > **This PR must NOT be auto-merged.** Manual review is required.
