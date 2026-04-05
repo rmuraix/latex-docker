@@ -14,11 +14,11 @@ ARG DEBIAN_VERSION=12
 
 # ── Node.js source (binary copy only) ─────────────────────────────────────
 # renovate: datasource=docker depName=node versioning=docker
-FROM node:24.14.0-slim@sha256:e8e2e91b1378f83c5b2dd15f0247f34110e2fe895f6ca7719dbb780f929368eb AS node
+FROM node:24.14.0-slim@sha256:d8e448a56fc63242f70026718378bd4b00f8c82e78d20eefb199224a4d8e33d8 AS node
 
 # ── latex-base ─────────────────────────────────────────────────────────────
 # renovate: datasource=docker depName=debian versioning=docker
-FROM debian:${DEBIAN_VERSION}-slim@sha256:8af0e5095f9964007f5ebd11191dfe52dcb51bf3afa2c07f055fc5451b78ba0e AS latex-base
+FROM debian:${DEBIAN_VERSION}-slim@sha256:f06537653ac770703bc45b4b113475bd402f451e85223f0f2837acbf89ab020a AS latex-base
 
 ARG TL_YEAR=2025
 
