@@ -6,17 +6,16 @@ on:
     tags: ["v*"]
     paths:
       - "Dockerfile"
+      - "texlive.profile"
       - ".github/workflows/build.yaml"
       - "tests/**"
   pull_request:
     branches: ["main"]
     paths:
       - "Dockerfile"
+      - "texlive.profile"
       - ".github/workflows/build.yaml"
       - "tests/**"
-  # Triggered by build-base.yaml after a successful latex-base push to main
-  repository_dispatch:
-    types: ["latex-base-updated"]
   workflow_dispatch:
 
 permissions:
@@ -25,7 +24,6 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: latex
   IMAGE_OWNER: ${{ github.repository_owner }}
 
 jobs:
@@ -45,31 +43,65 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Docker metadata
+      - name: Extract TeX Live year
+        id: tl
+        run: |
+          year=$(grep 'ARG TL_YEAR=' Dockerfile | cut -d= -f2)
+          echo "year=${year}" >> $GITHUB_OUTPUT
+
+      # ── latex-base stage ────────────────────────────────────────────────
+      # Builds the TeX Live stage and pushes it as ghcr.io/{owner}/latex-base.
+      # Also writes the GHA cache so the latex stage reuses these layers.
+      - name: Docker metadata (latex-base)
+        id: meta-base
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/latex-base
+          tags: |
+            type=raw,value=${{ steps.tl.outputs.year }}
+            type=raw,value=${{ steps.tl.outputs.year }}-{{date 'YYYYMMDD'}}
+
+      - name: Build and push latex-base
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          target: latex-base
+          load: ${{ github.event_name == 'pull_request' }}
+          push: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+          tags: ${{ steps.meta-base.outputs.tags }}
+          labels: ${{ steps.meta-base.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ── latex stage ─────────────────────────────────────────────────────
+      # Builds the final image on top of the cached latex-base layers.
+      - name: Docker metadata (latex)
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/latex
           tags: |
             type=raw,value=latest
             type=ref,event=tag
 
-      - uses: docker/build-push-action@v6
+      - name: Build and push latex
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           load: true
-          push: ${{ github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main' || github.event_name == 'repository_dispatch') }}
+          push: ${{ github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main') }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
 
+      # ── tests ────────────────────────────────────────────────────────────
       - name: Test pdfLaTeX
         run: |
           docker run --rm \
             -v "${{ github.workspace }}/tests":/work \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_NAME }}:latest \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/latex:latest \
             latexmk -pdf -interaction=nonstopmode -halt-on-error \
               -output-directory=/tmp pdflatex.tex
 
@@ -77,7 +109,7 @@ jobs:
         run: |
           docker run --rm \
             -v "${{ github.workspace }}/tests":/work \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_NAME }}:latest \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/latex:latest \
             latexmk -lualatex -interaction=nonstopmode -halt-on-error \
               -output-directory=/tmp lualatex.tex
 
@@ -85,12 +117,12 @@ jobs:
         run: |
           docker run --rm \
             -v "${{ github.workspace }}/tests":/work \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_NAME }}:latest \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/latex:latest \
             sh -c "cd /work && latexmk -lualatex -interaction=nonstopmode -halt-on-error \
               -output-directory=/tmp biber.tex"
 
       - name: Test npm (non-root user)
         run: |
           docker run --rm \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_NAME }}:latest \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/latex:latest \
             npm --version
