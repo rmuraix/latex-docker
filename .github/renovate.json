@@ -6,8 +6,9 @@
   ],
   "packageRules": [
     {
+      "description": "Monthly digest/patch updates for OS and Node.js base images",
       "matchDatasources": ["docker"],
-      "matchPackageNames": ["texlive/texlive", "node"],
+      "matchPackageNames": ["debian", "node"],
       "matchUpdateTypes": ["digest", "minor", "patch"],
       "schedule": ["on the first day of the month"],
       "addLabels": ["monthly"],

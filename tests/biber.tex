@@ -1,0 +1,29 @@
+\documentclass{article}
+\usepackage[backend=biber,style=numeric]{biblatex}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{hyperref}
+
+\addbibresource{biber.bib}
+
+\geometry{margin=1in}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+
+\title{Biber Test Document}
+\author{Test}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+This document verifies that \texttt{biber} bibliography processing works correctly
+using the packages installed in the image.
+
+\section{Citation}
+Testing bibliography processing with biblatex and biber backend.
+See the foundational reference \cite{test2025} for details.
+
+\printbibliography
+
+\end{document}
