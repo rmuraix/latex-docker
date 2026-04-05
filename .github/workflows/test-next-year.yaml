@@ -1,0 +1,127 @@
+name: Test next TeX Live year
+
+# Runs monthly to probe whether the next TeX Live year's tlnet-final is available.
+# If the build and all tests pass, a PR is opened automatically.
+# The PR is NOT auto-merged; it requires manual review.
+
+on:
+  schedule:
+    # 09:00 UTC on the 1st of every month
+    - cron: "0 9 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  test-next-year:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine current and next TeX Live year
+        id: years
+        run: |
+          CURRENT=$(grep 'ARG TL_YEAR=' Dockerfile.base | cut -d= -f2)
+          NEXT=$((CURRENT + 1))
+          echo "current=${CURRENT}" >> $GITHUB_OUTPUT
+          echo "next=${NEXT}"       >> $GITHUB_OUTPUT
+
+      - name: Check whether tlnet-final is available for next year
+        id: check
+        run: |
+          NEXT="${{ steps.years.outputs.next }}"
+          URL="https://ftp.tug.org/historic/systems/texlive/${NEXT}/tlnet-final/"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --head --max-time 30 "${URL}")
+          echo "status=${STATUS}" >> $GITHUB_OUTPUT
+          if [ "${STATUS}" != "200" ]; then
+            echo "::notice::tlnet-final for TeX Live ${NEXT} not yet available (HTTP ${STATUS}). Skipping."
+          else
+            echo "::notice::tlnet-final for TeX Live ${NEXT} is available. Proceeding with test build."
+          fi
+
+      - name: Set up Buildx
+        if: steps.check.outputs.status == '200'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build latex-base with next year
+        if: steps.check.outputs.status == '200'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.base
+          load: true
+          tags: latex-base-next:test
+          build-args: TL_YEAR=${{ steps.years.outputs.next }}
+
+      - name: Test pdfLaTeX with next year image
+        if: steps.check.outputs.status == '200'
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/tests":/work \
+            latex-base-next:test \
+            latexmk -pdf -interaction=nonstopmode -halt-on-error \
+              -output-directory=/tmp pdflatex.tex
+
+      - name: Test LuaLaTeX + Japanese with next year image
+        if: steps.check.outputs.status == '200'
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/tests":/work \
+            latex-base-next:test \
+            latexmk -lualatex -interaction=nonstopmode -halt-on-error \
+              -output-directory=/tmp lualatex.tex
+
+      - name: Test biber with next year image
+        if: steps.check.outputs.status == '200'
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/tests":/work \
+            latex-base-next:test \
+            sh -c "cd /work && latexmk -lualatex -interaction=nonstopmode -halt-on-error \
+              -output-directory=/tmp biber.tex"
+
+      - name: Update TL_YEAR in Dockerfile.base and texlive.profile
+        if: steps.check.outputs.status == '200'
+        run: |
+          CURRENT="${{ steps.years.outputs.current }}"
+          NEXT="${{ steps.years.outputs.next }}"
+          sed -i "s/ARG TL_YEAR=${CURRENT}/ARG TL_YEAR=${NEXT}/" Dockerfile.base
+          sed -i \
+            -e "s|/texlive/${CURRENT}|/texlive/${NEXT}|g" \
+            -e "s|texlive${CURRENT}|texlive${NEXT}|g" \
+            texlive.profile
+
+      - name: Create pull request
+        if: steps.check.outputs.status == '200'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: update/texlive-${{ steps.years.outputs.next }}
+          commit-message: "chore: update TeX Live year to ${{ steps.years.outputs.next }}"
+          title: "chore: update TeX Live year to ${{ steps.years.outputs.next }}"
+          body: |
+            ## TeX Live Year Update: ${{ steps.years.outputs.current }} → ${{ steps.years.outputs.next }}
+
+            This PR was created automatically by the `test-next-year` workflow after all tests passed.
+
+            ### What changed
+            - `ARG TL_YEAR` in `Dockerfile.base`: `${{ steps.years.outputs.current }}` → `${{ steps.years.outputs.next }}`
+            - Paths in `texlive.profile` updated accordingly
+
+            ### Tests passed
+            - [x] `Dockerfile.base` built successfully with `TL_YEAR=${{ steps.years.outputs.next }}`
+            - [x] pdfLaTeX sample compiled successfully
+            - [x] LuaLaTeX + Japanese sample compiled successfully
+            - [x] biber sample compiled successfully
+
+            ### Before merging
+            - Review the [TeX Live ${{ steps.years.outputs.next }} release notes](https://tug.org/texlive/doc/texlive-en/texlive-en.html)
+            - Verify the historic URL is stable: `https://ftp.tug.org/historic/systems/texlive/${{ steps.years.outputs.next }}/tlnet-final/`
+            - After merging, the `build-base.yaml` workflow will publish the new `latex-base:${{ steps.years.outputs.next }}` image
+            - Then update the `latex-base` digest in `Dockerfile` (Renovate will handle this monthly, or update manually)
+
+            > **This PR must NOT be auto-merged.** Manual review is required.
+          labels: texlive-year-update
+          draft: false

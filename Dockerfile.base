@@ -1,0 +1,90 @@
+# syntax=docker/dockerfile:1
+#
+# latex-base: TeX Live installed via install-tl from historic tlnet-final.
+#
+# TL_YEAR is fixed to a specific release year. All three of:
+#   - install-tl download
+#   - initial installation
+#   - tlmgr repository reference
+# point to the same historic tlnet-final URL for reproducibility.
+#
+# To update the OS base image digest, run:
+#   docker pull --platform linux/amd64 debian:12-slim
+# and replace the sha256 below with the new digest.
+#
+# The latex-base digest used in Dockerfile is managed by Renovate (monthly, auto-merge).
+# TL_YEAR updates are handled by .github/workflows/test-next-year.yaml (manual merge required).
+
+ARG DEBIAN_VERSION=12
+
+# renovate: datasource=docker depName=debian versioning=docker
+FROM debian:${DEBIAN_VERSION}-slim@sha256:8af0e5095f9964007f5ebd11191dfe52dcb51bf3afa2c07f055fc5451b78ba0e
+
+ARG TL_YEAR=2025
+ARG TL_REPO=https://ftp.tug.org/historic/systems/texlive/${TL_YEAR}/tlnet-final
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+# --------------------------------------------------
+# OS dependencies for install-tl
+# --------------------------------------------------
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      ca-certificates \
+      fontconfig \
+      perl \
+      wget \
+ && rm -rf /var/lib/apt/lists/*
+
+# --------------------------------------------------
+# TeX Live installation profile
+# --------------------------------------------------
+# Copy the reference profile (year 2025) and substitute TL_YEAR at build time.
+# This allows next-year test builds to pass --build-arg TL_YEAR=2026 without
+# modifying the checked-in profile.
+COPY texlive.profile /tmp/texlive.profile.orig
+RUN sed \
+      -e "s|/texlive/2025|/texlive/${TL_YEAR}|g" \
+      -e "s|texlive2025|texlive${TL_YEAR}|g" \
+      /tmp/texlive.profile.orig > /tmp/texlive.profile \
+ && rm /tmp/texlive.profile.orig
+
+# --------------------------------------------------
+# install-tl — downloaded from the same historic repository
+# --------------------------------------------------
+RUN --mount=type=cache,target=/var/cache/install-tl,sharing=locked \
+    set -eux; \
+    INSTALLER=$(mktemp -d); \
+    wget -qO- "${TL_REPO}/install-tl-unx.tar.gz" | tar -xz -C "${INSTALLER}"; \
+    "${INSTALLER}"/install-tl-*/install-tl \
+        --repository="${TL_REPO}" \
+        --profile=/tmp/texlive.profile \
+        --no-interaction; \
+    rm -rf "${INSTALLER}" /tmp/texlive.profile
+
+# --------------------------------------------------
+# PATH: explicit year + arch directory (no wildcard symlinks)
+# --------------------------------------------------
+ENV PATH="/usr/local/texlive/${TL_YEAR}/bin/x86_64-linux:${PATH}"
+
+# --------------------------------------------------
+# Additional collections and tools (via tlmgr)
+# tlmgr repository is pinned to the same historic snapshot
+# --------------------------------------------------
+RUN tlmgr option repository "${TL_REPO}" \
+ && tlmgr option -- autobackup 0 \
+ && tlmgr option -- docfiles 0 \
+ && tlmgr option -- srcfiles 0 \
+ && tlmgr install \
+      collection-latexrecommended \
+      collection-latexextra \
+      collection-fontsrecommended \
+      collection-bibtexextra \
+      collection-luatex \
+      collection-langjapanese \
+      latexmk \
+      biber \
+ && rm -rf /usr/local/texlive/${TL_YEAR}/tlpkg/backups \
+ && mktexlsr

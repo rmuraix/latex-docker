@@ -2,7 +2,7 @@ name: Tag GHCR monthly
 
 on:
   pull_request:
-    types: [ "closed" ]
+    types: ["closed"]
 
 permissions:
   contents: read
@@ -10,19 +10,19 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: latex
   IMAGE_OWNER: ${{ github.repository_owner }}
 
 jobs:
-  tag-monthly:
+  # Tag the latex image with a date stamp when a monthly Renovate PR is merged
+  tag-latex-monthly:
     runs-on: ubuntu-latest
-    if: > 
+    if: >
       github.event.pull_request.merged == true &&
       github.event.pull_request.base.ref == github.event.repository.default_branch &&
       contains(github.event.pull_request.labels.*.name, 'monthly') &&
       github.event.pull_request.user.id == 29139614
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
 
@@ -42,7 +42,7 @@ jobs:
           TZ: Asia/Tokyo
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/latex
           tags: |
             type=raw,value={{date 'YYYY-MM-DD'}}
 
@@ -50,6 +50,60 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Rebuild and tag latex-base when a monthly-base Renovate PR (debian digest update) is merged,
+  # then dispatch a latex rebuild via repository_dispatch
+  tag-latex-base-monthly:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == github.event.repository.default_branch &&
+      contains(github.event.pull_request.labels.*.name, 'monthly-base') &&
+      github.event.pull_request.user.id == 29139614
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract TeX Live year from Dockerfile.base
+        id: tl
+        run: |
+          year=$(grep 'ARG TL_YEAR=' Dockerfile.base | cut -d= -f2)
+          echo "year=${year}" >> $GITHUB_OUTPUT
+
+      - name: Docker metadata
+        id: meta
+        env:
+          TZ: Asia/Tokyo
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/latex-base
+          tags: |
+            type=raw,value=${{ steps.tl.outputs.year }}
+            type=raw,value=${{ steps.tl.outputs.year }}-{{date 'YYYYMMDD'}}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.base
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

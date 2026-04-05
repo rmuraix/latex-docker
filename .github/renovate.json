@@ -6,13 +6,24 @@
   ],
   "packageRules": [
     {
+      "description": "Monthly digest/patch updates for the latex distribution image (node + latex-base)",
       "matchDatasources": ["docker"],
-      "matchPackageNames": ["texlive/texlive", "node"],
+      "matchPackageNames": ["node", "ghcr.io/rmuraix/latex-base"],
       "matchUpdateTypes": ["digest", "minor", "patch"],
       "schedule": ["on the first day of the month"],
       "addLabels": ["monthly"],
       "automerge": true,
       "groupName": "monthly updates"
+    },
+    {
+      "description": "Monthly digest/patch updates for the latex-base OS layer (debian)",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["debian"],
+      "matchUpdateTypes": ["digest", "minor", "patch"],
+      "schedule": ["on the first day of the month"],
+      "addLabels": ["monthly-base"],
+      "automerge": true,
+      "groupName": "monthly base updates"
     }
   ]
 }
