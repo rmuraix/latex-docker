@@ -69,6 +69,7 @@ jobs:
           file: ./Dockerfile
           target: latex-base
           push: true
+          provenance: false
           tags: ${{ steps.meta-base.outputs.tags }}
           labels: ${{ steps.meta-base.outputs.labels }}
           cache-from: type=gha
@@ -80,6 +81,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
+          provenance: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha

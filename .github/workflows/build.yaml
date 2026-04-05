@@ -69,10 +69,11 @@ jobs:
           target: latex-base
           load: ${{ github.event_name == 'pull_request' }}
           push: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+          provenance: false
           tags: ${{ steps.meta-base.outputs.tags }}
           labels: ${{ steps.meta-base.outputs.labels }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}
 
       # ── latex stage ─────────────────────────────────────────────────────
       # Builds the final image on top of the cached latex-base layers.
@@ -92,6 +93,7 @@ jobs:
           file: ./Dockerfile
           load: true
           push: ${{ github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main') }}
+          provenance: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha

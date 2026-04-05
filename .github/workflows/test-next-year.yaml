@@ -53,6 +53,7 @@ jobs:
           file: ./Dockerfile
           target: latex-base
           load: true
+          provenance: false
           tags: latex-base-next:test
           build-args: TL_YEAR=${{ steps.years.outputs.next }}
 
