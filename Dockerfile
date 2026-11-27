@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:24.14.0-slim@sha256:e8e2e91b1378f83c5b2dd15f0247f34110e2fe895f6ca7719dbb780f929368eb AS node
+FROM node:24.22.3-slim@sha256:873f586f3794f52281bd039bf02c048a0be08fde619338f9941bad1eb6b34530 AS node
 
 FROM texlive/texlive:latest-basic@sha256:4da564c0fb1f36f6e72767d4d50b985d8586b2e959399e3b8a08ccb6550c661e
 
